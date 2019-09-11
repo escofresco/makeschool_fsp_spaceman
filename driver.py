@@ -1,5 +1,21 @@
+import csv
 import os
 import random
+from typing import TextIO, Generator
+
+def lazy_read(file_object:TextIO, delimiter=' ') -> Generator:
+    '''
+    Lazily read a file character by character
+    '''
+    char = file_object.read(1)
+    word = []
+    while char != '':
+        if char == ' ':
+            yield ''.join(word)
+            word = []
+        else:
+            word.append(char)
+        char = file_object.read(1)
 
 def load_word():
     '''
@@ -8,13 +24,17 @@ def load_word():
     Returns:
            string: The secret word to be used in the spaceman guessing game
     '''
-    f = open('words.txt', 'r')
-    words_list = f.readlines()
-    f.close()
+    # O(n) time | O(1) space
+    with open('words.txt', 'r') as words:
+        rand_word = None
+        word_iter = lazy_read(words)
+        for i,word in enumerate(word_iter):
+            if i == 0:
+                rand_word = word
+            elif random.randint(1, i+1) == 1:
+                rand_word = word
+        return rand_word
 
-    words_list = words_list[0].split(' ') #comment this line out if you use a words.txt file with each word on a new line
-    secret_word = random.choice(words_list)
-    return secret_word
 
 def is_word_guessed(secret_word_set: set, letters_guessed: set):
     '''
@@ -25,8 +45,10 @@ def is_word_guessed(secret_word_set: set, letters_guessed: set):
     Returns:
         bool: True only if all the letters of secret_word are in letters_guessed, False otherwise
     '''
-    # return if the original set is the intersection of the two sets
+    # return True if secret_word_set is equal to the intersection
+    # of secret_word_set and letters_guessed
     return secret_word_set == secret_word_set & letters_guessed
+
 
 def get_guessed_word(secret_word: str, letters_guessed: set):
     '''
@@ -76,15 +98,14 @@ def spaceman(secret_word):
             print('You win')
             break
     else:
-        print('You lose')
+        print('You lose\n'
+              f'The word was {secret_word}')
 
 def clear():
     # thanks @poke
     # https://stackoverflow.com/questions/2084508/clear-terminal-in-python
     os.system('cls' if os.name == 'nt' else 'clear')
 
-
-
-#These function calls that will start the game
-secret_word = load_word()
-spaceman(secret_word)
+if __name__ == '__main__':
+    secret_word = load_word()
+    spaceman(secret_word)
