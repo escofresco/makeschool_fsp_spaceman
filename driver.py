@@ -25,13 +25,13 @@ def load_word():
            string: The secret word to be used in the spaceman guessing game
     '''
     # O(n) time | O(1) space
+    # this was where I saw the problem:
+    # https://www.dailycodingproblem.com/blog/how-to-pick-a-random-element-from-an-infinite-stream/
     with open('words.txt', 'r') as words:
-        rand_word = None
         word_iter = lazy_read(words)
-        for i,word in enumerate(word_iter):
-            if i == 0:
-                rand_word = word
-            elif random.randint(1, i+1) == 1:
+        rand_word = next(word_iter)
+        for i,word in enumerate(word_iter, 1):
+            if random.randint(1, i+1) == 1:
                 rand_word = word
         return rand_word
 
